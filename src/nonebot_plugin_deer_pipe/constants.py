@@ -21,5 +21,5 @@ MISANS_FONT: FreeTypeFont = ImageFont.truetype(
 # Database
 DATABASE_VERSION: int = 1
 DATABASE_NAME: str = f"userdata-v{DATABASE_VERSION}.db"
-DATABASE_PATH: Path = PLUGIN_PATH
+DATABASE_PATH: Path = PLUGIN_PATH / DATABASE_NAME
 DATABASE_URL: str = f"sqlite+aiosqlite:///{DATABASE_PATH}"

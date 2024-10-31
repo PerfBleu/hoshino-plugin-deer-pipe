@@ -30,7 +30,7 @@ async def luguan(bot, event: CQEvent):
     img: bytes = generate_image(now, name, deer)
     await bot.send(
         event,
-        f'成功🦌了[CQ:image,base64://{str(base64.b64encode(img))}]',
+        f'成功🦌了[CQ:image,file=base64://{base64.b64encode(img).decode()}]',
         at_sender=True
     )
 
@@ -54,6 +54,6 @@ async def bulu(bot, event: CQEvent):
     img: bytes = generate_image(now, name, deer)
     await bot.send(
         event,
-        f'{"成功补🦌" if ok else "只能补🦌没有🦌的日子捏"}[CQ:image,base64://{str(base64.b64encode(img))}]',
+        f'{"成功补🦌" if ok else "只能补🦌没有🦌的日子捏"}[CQ:image,file=base64://{base64.b64encode(img).decode()}]',
         at_sender=True
     )
