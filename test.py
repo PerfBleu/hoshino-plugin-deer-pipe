@@ -14,10 +14,10 @@ driver.register_adapter(Adapter)
 
 # Load plugin
 try:
-  nonebot.load_plugin(Path("src/nonebot_plugin_deer_pipe"))
+    nonebot.load_plugin(Path("src/nonebot_plugin_deer_pipe"))
 except:
-  pass
+    pass
 
 # Main entry
 if __name__ == "__main__":
-  nonebot.run(app="test:app")
+    nonebot.run(app="test:app")

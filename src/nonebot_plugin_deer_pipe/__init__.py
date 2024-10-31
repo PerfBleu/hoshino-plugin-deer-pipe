@@ -1,71 +1,58 @@
 from .database import attend, reattend
 from .image import generate_image
-
+import base64
 from datetime import datetime
-from nonebot.plugin import PluginMetadata, inherit_supported_adapters, require
-
-require("nonebot_plugin_alconna")
-require("nonebot_plugin_userinfo")
-
-from nonebot_plugin_alconna import (
-  Alconna, AlconnaMatcher, AlconnaMatches, Args, Arparma, UniMessage, on_alconna
-)
-from nonebot_plugin_userinfo import EventUserInfo, UserInfo
+from hoshino import Service, priv
+from hoshino.typing import CQEvent
 
 
-# Plugin meta
-__plugin_meta__: PluginMetadata = PluginMetadata(
-  name="🦌管签到",
-  description="一个🦌管签到插件",
-  usage="发送🦌以进行签到",
-  type="application",
-  homepage="https://github.com/SamuNatsu/nonebot-plugin-deer-pipe",
-  supported_adapters=inherit_supported_adapters(
-    "nonebot_plugin_alconna", "nonebot_plugin_userinfo"
-  )
+sv_help = '''
+发送🦌以进行签到
+'''.strip()
+
+sv = Service(
+    name="🦌管签到",  # 功能名
+    visible=True,  # 可见性
+    enable_on_default=True,  # 默认启用
+    bundle="娱乐",  # 分组归类
+    help_=sv_help,  # 帮助说明
 )
 
-# Matchers
-deer_matcher: AlconnaMatcher   = on_alconna("🦌")
-redeer_matcher: AlconnaMatcher = on_alconna(Alconna("补🦌", Args["day", int]))
 
-# Handlers
-@deer_matcher.handle()
-async def _(user_info: UserInfo = EventUserInfo()) -> None:
-  name: str = (
-    user_info.user_remark or
-    user_info.user_displayname or
-    user_info.user_name
-  )
-  now: datetime = datetime.now()
+@sv.on_prefix("🦌")
+async def luguan(bot, event: CQEvent):
+    sid = event.self_id
+    gid = str(event.group_id)
+    card: dict = bot.get_group_member_info(group_id=gid, user_id=sid)
+    name: str = (card.get("card") or card.get("nickname") or str(sid))
+    now: datetime = datetime.now()
+    deer: dict[int, int] = await attend(now, str(sid))
+    img: bytes = generate_image(now, name, deer)
+    await bot.send(
+        event,
+        f'成功🦌了[CQ:image,base64://{str(base64.b64encode(img))}]',
+        at_sender=True
+    )
 
-  deer: dict[int, int] = await attend(now, user_info.user_id)
-  img: bytes = generate_image(now, name, deer)
+@sv.on_prefix("补🦌")
+async def bulu(bot, event: CQEvent):
+    sid = event.self_id
+    gid = str(event.group_id)
+    card: dict = bot.get_group_member_info(group_id=gid, user_id=sid)
+    name: str = (card.get("card") or card.get("nickname") or str(sid))
+    now: datetime = datetime.now()
+    try:
+        day: int = int(event.message.extract_plain_text().strip().split(" ")[-1])
+    except Exception:
+        day: int = -1
+    if day <= 0 or day >= now.day:
+        await bot.send(event, "不是合法的补🦌日期捏", at_sender=True)
+        return
 
-  await UniMessage.text("成功🦌了").image(raw=img).finish(reply_to=True)
-
-@redeer_matcher.handle()
-async def _(
-  user_info: UserInfo = EventUserInfo(),
-  result: Arparma = AlconnaMatches()
-) -> None:
-  name: str = (
-    user_info.user_remark or
-    user_info.user_displayname or
-    user_info.user_name
-  )
-  day: int = result.main_args["day"]
-  now: datetime = datetime.now()
-
-  if day <= 0 or day >= now.day:
-    await UniMessage.text(f"不是合法的补🦌日期捏").finish(reply_to=True)
-
-  ok, deer = await reattend(now, day, user_info.user_id)
-  img: bytes = generate_image(now, name, deer)
-
-  await (
-    UniMessage
-      .text("成功补🦌" if ok else "只能补🦌没有🦌的日子捏" )
-      .image(raw=img)
-      .send(reply_to=True)
-  )
+    ok, deer = await reattend(now, day, str(sid))
+    img: bytes = generate_image(now, name, deer)
+    await bot.send(
+        event,
+        f'{"成功补🦌" if ok else "只能补🦌没有🦌的日子捏"}[CQ:image,base64://{str(base64.b64encode(img))}]',
+        at_sender=True
+    )
