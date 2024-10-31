@@ -2,7 +2,7 @@ from .database import attend, reattend
 from .image import generate_image
 import base64
 from datetime import datetime
-from hoshino import Service, priv
+from hoshino import Service
 from hoshino.typing import CQEvent
 
 
@@ -19,11 +19,11 @@ sv = Service(
 )
 
 
-@sv.on_prefix("🦌")
+@sv.on_fullmatch("🦌")
 async def luguan(bot, event: CQEvent):
     sid = event.self_id
     gid = str(event.group_id)
-    card: dict = bot.get_group_member_info(group_id=gid, user_id=sid)
+    card: dict = await bot.get_group_member_info(group_id=gid, user_id=sid)
     name: str = (card.get("card") or card.get("nickname") or str(sid))
     now: datetime = datetime.now()
     deer: dict[int, int] = await attend(now, str(sid))
@@ -34,11 +34,12 @@ async def luguan(bot, event: CQEvent):
         at_sender=True
     )
 
+
 @sv.on_prefix("补🦌")
 async def bulu(bot, event: CQEvent):
     sid = event.self_id
     gid = str(event.group_id)
-    card: dict = bot.get_group_member_info(group_id=gid, user_id=sid)
+    card: dict = await bot.get_group_member_info(group_id=gid, user_id=sid)
     name: str = (card.get("card") or card.get("nickname") or str(sid))
     now: datetime = datetime.now()
     try:
