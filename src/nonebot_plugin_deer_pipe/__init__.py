@@ -21,7 +21,7 @@ sv = Service(
 
 @sv.on_fullmatch("🦌")
 async def luguan(bot, event: CQEvent):
-    sid = event.self_id
+    sid = event.user_id
     gid = str(event.group_id)
     card: dict = await bot.get_group_member_info(group_id=gid, user_id=sid)
     name: str = (card.get("card") or card.get("nickname") or str(sid))
@@ -37,7 +37,7 @@ async def luguan(bot, event: CQEvent):
 
 @sv.on_prefix("补🦌")
 async def bulu(bot, event: CQEvent):
-    sid = event.self_id
+    sid = event.user_id
     gid = str(event.group_id)
     card: dict = await bot.get_group_member_info(group_id=gid, user_id=sid)
     name: str = (card.get("card") or card.get("nickname") or str(sid))
